@@ -1,0 +1,22 @@
+[package]
+name = "fash"
+version = "0.1.0"
+authors = ["Victor Nilsson <@vcrn>"]
+description = "cross-platform GUI-app for calculating hashes of files and comparing them to supplied hashes"
+keywords = ["hash", "gui", "cross-platform", "sha256", "sha1", "md5"]
+categories = ["cryptography", "filesystem"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/vcrn/fash"
+homepage = "https://github.com/vcrn/fash"
+readme = "README.md"
+edition = "2021"
+
+[dependencies]
+sha256 = "1.0.3"
+sha1 = "0.10.1"
+sha2 = "0.10.2"
+md-5 = "0.10.1"
+egui = "0.18.0"
+eframe = { version = "0.18.0", features = ["persistence"] }
+rfd = "0.8"
+base16ct = "0.1.1"

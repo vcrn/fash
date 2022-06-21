@@ -1,0 +1,1 @@
+This file is used for testing the function hasher() in src/app.rs

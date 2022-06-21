@@ -1,7 +1,7 @@
 mod hasher;
 
 use eframe::egui;
-use hasher::hasher;
+use hasher::compute_hash;
 use md5::Md5;
 use sha1::Sha1;
 use sha2::Sha256;
@@ -70,9 +70,9 @@ impl eframe::App for Fash {
 
                     if ui.button("Hash file").clicked() {
                         let hash_result = match self.radio_hash {
-                            RadioHash::Sha256 => hasher::<Sha256>(&self.file_path),
-                            RadioHash::Sha1 => hasher::<Sha1>(&self.file_path),
-                            RadioHash::Md5 => hasher::<Md5>(&self.file_path),
+                            RadioHash::Sha256 => compute_hash::<Sha256>(&self.file_path),
+                            RadioHash::Sha1 => compute_hash::<Sha1>(&self.file_path),
+                            RadioHash::Md5 => compute_hash::<Md5>(&self.file_path),
                         };
                         self.computed_hash = match hash_result {
                             Ok(hash) => {

@@ -51,7 +51,6 @@ impl eframe::App for Fash {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
 
-
             ui.horizontal(|ui| {
                 ui.vertical(|ui| {
                     egui::global_dark_light_mode_buttons(ui);
@@ -73,15 +72,11 @@ impl eframe::App for Fash {
                         egui::TextEdit::multiline(&mut self.entered_hash)
                             .hint_text("Enter hash to compare file hash, to or leave blank"),
                     );
-                    if !self.entered_hash.is_empty() {
-                        if ui.button("Remove whitespace").clicked() {
-                            self.entered_hash.retain(|c| !c.is_whitespace());
-                        };
+                    if !self.entered_hash.is_empty() && ui.button("Remove whitespace").clicked() {
+                        self.entered_hash.retain(|c| !c.is_whitespace());
                     };
                 });
             });
-
-
 
             if !self.file_path.is_empty() {
                 ui.group(|ui| {

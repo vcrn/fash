@@ -50,19 +50,38 @@ struct Fash {
 impl eframe::App for Fash {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            egui::global_dark_light_mode_buttons(ui);
-            ui.label("Drag-and-drop a file onto the window!");
 
-            if ui.button("Open file…").clicked() {
-                if let Some(path) = rfd::FileDialog::new().pick_file() {
-                    self.picked_path = Some(path.display().to_string());
-                }
-                if let Some(picked_path) = &self.picked_path {
-                    self.file_path = picked_path.clone();
-                }
-                self.picked_path = None;
-                self.computed_hash = "".to_string();
-            }
+
+            ui.horizontal(|ui| {
+                ui.vertical(|ui| {
+                    egui::global_dark_light_mode_buttons(ui);
+                    ui.label("Drag-and-drop a file onto the window!");
+                    if ui.button("Open file…").clicked() {
+                        if let Some(path) = rfd::FileDialog::new().pick_file() {
+                            self.picked_path = Some(path.display().to_string());
+                        }
+                        if let Some(picked_path) = &self.picked_path {
+                            self.file_path = picked_path.clone();
+                        }
+                        self.picked_path = None;
+                        self.computed_hash = "".to_string();
+                    }
+                });
+
+                ui.horizontal(|ui| {
+                    ui.add(
+                        egui::TextEdit::multiline(&mut self.entered_hash)
+                            .hint_text("Enter hash to compare file hash, to or leave blank"),
+                    );
+                    if !self.entered_hash.is_empty() {
+                        if ui.button("Remove whitespace").clicked() {
+                            self.entered_hash.retain(|c| !c.is_whitespace());
+                        };
+                    };
+                });
+            });
+
+
 
             if !self.file_path.is_empty() {
                 ui.group(|ui| {
@@ -94,18 +113,6 @@ impl eframe::App for Fash {
                     });
                 });
             }
-
-            ui.horizontal(|ui| {
-                ui.add(
-                    egui::TextEdit::multiline(&mut self.entered_hash)
-                        .hint_text("Enter hash to compare file hash to or leave blank"),
-                );
-                if !self.entered_hash.is_empty() {
-                    if ui.button("Remove whitespace").clicked() {
-                        self.entered_hash.retain(|c| !c.is_whitespace());
-                    };
-                };
-            });
 
             // Show dropped files (if any):
             if !self.dropped_files.is_empty() {

@@ -61,6 +61,7 @@ impl eframe::App for Fash {
                     self.file_path = picked_path.clone();
                 }
                 self.picked_path = None;
+                self.computed_hash = "".to_string();
             }
 
             if !self.file_path.is_empty() {
@@ -122,6 +123,7 @@ impl eframe::App for Fash {
                     self.file_path = file_path;
                 }
                 self.dropped_files.clear();
+                self.computed_hash = "".to_string();
             }
 
             // Display hash and info

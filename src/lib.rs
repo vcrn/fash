@@ -94,10 +94,17 @@ impl eframe::App for Fash {
                 });
             }
 
-            ui.add(
-                egui::TextEdit::multiline(&mut self.entered_hash)
-                    .hint_text("Enter hash to compare file hash to or leave blank"),
-            );
+            ui.horizontal(|ui| {
+                ui.add(
+                    egui::TextEdit::multiline(&mut self.entered_hash)
+                        .hint_text("Enter hash to compare file hash to or leave blank"),
+                );
+                if !self.entered_hash.is_empty() {
+                    if ui.button("Remove whitespace").clicked() {
+                        self.entered_hash.retain(|c| !c.is_whitespace());
+                    };
+                };
+            });
 
             // Show dropped files (if any):
             if !self.dropped_files.is_empty() {

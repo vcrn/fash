@@ -83,7 +83,7 @@ impl eframe::App for Fash {
                     ui.label("Selected file:");
                     ui.label(&self.file_path);
 
-                    if ui.button("Hash file").clicked() {
+                    if ui.button("Compute file hash").clicked() {
                         let hash_result = match self.radio_hash {
                             RadioHash::Sha256 => compute_hash::<Sha256>(&self.file_path),
                             RadioHash::Sha1 => compute_hash::<Sha1>(&self.file_path),

@@ -131,13 +131,12 @@ impl eframe::App for Fash {
             // Display hash and info
             ui.label("\n");
 
-            if !self.computed_hash.is_empty() || (!self.computed_hash.is_empty() && !self.entered_hash.is_empty()) {
+            if !self.computed_hash.is_empty() {
                 ui.group(|ui| {
-                    if !self.computed_hash.is_empty() {
-                        ui.label("Hash is");
-                        selectable_text(ui, self.computed_hash.as_str());
-                    }
-                    if !self.computed_hash.is_empty() && !self.entered_hash.is_empty() {
+                    ui.label("Hash is");
+                    selectable_text(ui, self.computed_hash.as_str());
+
+                    if !self.entered_hash.is_empty() {
                         ui.label(format!("Hashes match: {}", self.computed_hash == self.entered_hash));
                     }
                 });

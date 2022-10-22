@@ -209,7 +209,7 @@ fn preview_files_being_dropped(ctx: &egui::Context) {
 /// ```
 /// let input_file_path = "folder1/folder2/some_pic.jpg";
 /// let hash_algorithm = &fash::RadioHash::Sha256;
-/// let expected_output_file_path = "folder1/folder2/some_pic_sha256.txt";
+/// let expected_output_file_path = "folder1/folder2/some_pic.jpg_sha256.txt";
 /// let generated_output_file_path = fash::generate_output_file_path(input_file_path, hash_algorithm);
 /// assert_eq!(generated_output_file_path, expected_output_file_path);
 /// ```

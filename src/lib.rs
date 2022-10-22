@@ -220,11 +220,7 @@ pub fn generate_output_file_path(input_file_path: &str, hash_algorithm: &RadioHa
         RadioHash::Md5 => "_md5",
     };
 
-    let mut output_file_path = input_file_path.split('.').next().unwrap().to_string(); // Returns first element of iterator. TODO: remove unwrap()
-    output_file_path.push_str(hash_append);
-    output_file_path.push_str(".txt");
-
-    output_file_path
+    input_file_path.to_string() + hash_append + ".txt"
 }
 
 /// Writes data to output_file_path

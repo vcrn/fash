@@ -41,6 +41,7 @@ struct Fash {
     dropped_files: Vec<egui::DroppedFile>,
     picked_path: Option<String>,
     entered_hash: String,
+    keep_whitespace: bool,
     file_path: String,
     computed_hash: String,
     radio_hash: RadioHash,
@@ -72,8 +73,11 @@ impl eframe::App for Fash {
                         egui::TextEdit::multiline(&mut self.entered_hash)
                             .hint_text("Enter hash to compare file hash, to or leave blank"),
                     );
-                    if !self.entered_hash.is_empty() && ui.button("Remove whitespace").clicked() {
-                        self.entered_hash.retain(|c| !c.is_whitespace());
+                    ui.checkbox(&mut self.keep_whitespace, "Keep whitespace");
+                    if !self.entered_hash.is_empty() {
+                        if !self.keep_whitespace {
+                            self.entered_hash.retain(|c| !c.is_whitespace());
+                        }
                     };
                 });
             });

@@ -13,7 +13,7 @@ pub fn run() {
         ..Default::default()
     };
     eframe::run_native(
-        "File hash verifier",
+        "fash",
         options,
         Box::new(|cc| {
             cc.egui_ctx.set_visuals(egui::Visuals::dark());
@@ -46,6 +46,7 @@ struct Fash {
     computed_hash: String,
     radio_hash: RadioHash,
     output_file_path: String,
+    write_file_result: &'static str,
 }
 
 impl eframe::App for Fash {
@@ -88,6 +89,8 @@ impl eframe::App for Fash {
                     ui.label(&self.file_path);
 
                     if ui.button("Compute file hash").clicked() {
+                        self.write_file_result = ""; // Emptied to not display old Ok or error message for saving hash to file
+
                         let hash_result = match self.radio_hash {
                             RadioHash::Sha256 => compute_hash::<Sha256>(&self.file_path),
                             RadioHash::Sha1 => compute_hash::<Sha1>(&self.file_path),
@@ -149,11 +152,16 @@ impl eframe::App for Fash {
                         if let Err(e) = write_file(&self.computed_hash, &self.file_path) {
                             let err_mess = "Unable to save hash to file!";
                             println!("{}! Error: {}", err_mess, e);
-                            self.output_file_path = err_mess.to_string();
+                            self.write_file_result = err_mess;
+                        } else {
+                            self.write_file_result = "Hash saved to file!";
                         };
                     }
                     ui.label(format!("Output file path: {}", self.output_file_path));
                     ui.label("NOTE: IF A FILE MATCHING THE OUTPUT FILE PATH ALREADY EXISTS, SAVING THE HASH WILL OVERWRITE IT");
+                    if !self.write_file_result.is_empty() {
+                        ui.label(self.write_file_result);
+                    }
                 }
             }
         });

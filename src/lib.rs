@@ -1,5 +1,6 @@
 mod hasher;
 
+use crate::egui::Align;
 use eframe::egui;
 use hasher::compute_hash;
 use md5::Md5;
@@ -10,6 +11,8 @@ use std::io::Write;
 pub fn run() {
     let options = eframe::NativeOptions {
         drag_and_drop_support: true,
+        max_window_size: Some([700.0, 520.0].into()),
+        min_window_size: Some([650.0, 500.0].into()),
         ..Default::default()
     };
     eframe::run_native(
@@ -69,12 +72,12 @@ impl eframe::App for Fash {
                     }
                 });
 
-                ui.horizontal(|ui| {
+                ui.with_layout(egui::Layout::top_down(Align::RIGHT), |ui| {
+                    ui.checkbox(&mut self.keep_whitespace, "Keep whitespace");
                     ui.add(
                         egui::TextEdit::multiline(&mut self.entered_hash)
                             .hint_text("Enter hash to compare file hash, to or leave blank"),
                     );
-                    ui.checkbox(&mut self.keep_whitespace, "Keep whitespace");
                     if !self.entered_hash.is_empty() {
                         if !self.keep_whitespace {
                             self.entered_hash.retain(|c| !c.is_whitespace());
@@ -83,87 +86,91 @@ impl eframe::App for Fash {
                 });
             });
 
-            if !self.file_path.is_empty() {
-                ui.group(|ui| {
-                    ui.label("Selected file:");
-                    ui.label(&self.file_path);
+            ui.label("\n"); // To get some space 
 
-                    if ui.button("Compute file hash").clicked() {
-                        self.write_file_result = ""; // Emptied to not display old Ok or error message for saving hash to file
+            ui.with_layout(egui::Layout::top_down(Align::Center), |ui| {
+                if !self.file_path.is_empty() {
+                    ui.group(|ui| {
+                        ui.label("Selected file:");
+                        ui.label(&self.file_path);
 
-                        let hash_result = match self.radio_hash {
-                            RadioHash::Sha256 => compute_hash::<Sha256>(&self.file_path),
-                            RadioHash::Sha1 => compute_hash::<Sha1>(&self.file_path),
-                            RadioHash::Md5 => compute_hash::<Md5>(&self.file_path),
-                        };
-                        self.computed_hash = match hash_result {
-                            Ok(hash) => {
-                                self.output_file_path =
-                                    generate_output_file_path(&self.file_path, &self.radio_hash);
-                                hash
-                            }
-                            _ => {
-                                self.output_file_path = "".to_string();
-                                "ERROR: Couldn't read file".to_string()
-                            }
-                        };
-                    }
-                    ui.horizontal(|ui| {
-                        ui.radio_value(&mut self.radio_hash, RadioHash::Sha256, "SHA256");
-                        ui.radio_value(&mut self.radio_hash, RadioHash::Sha1, "SHA1");
-                        ui.radio_value(&mut self.radio_hash, RadioHash::Md5, "MD5");
+                        if ui.button("Compute file hash").clicked() {
+                            self.write_file_result = ""; // Emptied to not display old Ok or error message for saving hash to file
+
+                            let hash_result = match self.radio_hash {
+                                RadioHash::Sha256 => compute_hash::<Sha256>(&self.file_path),
+                                RadioHash::Sha1 => compute_hash::<Sha1>(&self.file_path),
+                                RadioHash::Md5 => compute_hash::<Md5>(&self.file_path),
+                            };
+                            self.computed_hash = match hash_result {
+                                Ok(hash) => {
+                                    self.output_file_path =
+                                        generate_output_file_path(&self.file_path, &self.radio_hash);
+                                    hash
+                                }
+                                _ => {
+                                    self.output_file_path = "".to_string();
+                                    "ERROR: Couldn't read file".to_string()
+                                }
+                            };
+                        }
+                        ui.horizontal(|ui| {
+                            ui.radio_value(&mut self.radio_hash, RadioHash::Sha256, "SHA256");
+                            ui.radio_value(&mut self.radio_hash, RadioHash::Sha1, "SHA1");
+                            ui.radio_value(&mut self.radio_hash, RadioHash::Md5, "MD5");
+                        });
                     });
-                });
-            }
-
-            // Show dropped files (if any):
-            if !self.dropped_files.is_empty() {
-                for file in &self.dropped_files {
-                    let mut file_path = if let Some(path) = &file.path {
-                        path.display().to_string()
-                    } else if !file.name.is_empty() {
-                        file.name.clone()
-                    } else {
-                        "???".to_owned()
-                    };
-                    if let Some(bytes) = &file.bytes {
-                        file_path += &format!(" ({} bytes)", bytes.len());
-                    }
-                    self.file_path = file_path;
                 }
-                self.dropped_files.clear();
-                self.computed_hash = "".to_string();
-            }
 
-            // Display hash and info
-            ui.label("\n");
-
-            if !self.computed_hash.is_empty() {
-                ui.group(|ui| {
-                    ui.label("Hash is");
-                    selectable_text(ui, self.computed_hash.as_str());
-
-                    if !self.entered_hash.is_empty() {
-                        ui.label(format!("Hashes match: {}", self.computed_hash == self.entered_hash));
-                    }
-                });
-                if !self.output_file_path.is_empty() {
-                    if ui.button("Save hash to file").clicked() {
-                        if let Err(e) = write_file(&self.computed_hash, &self.file_path) {
-                            let err_mess = "Unable to save hash to file!";
-                            println!("{}! Error: {}", err_mess, e);
-                            self.write_file_result = err_mess;
+                // Show dropped files (if any):
+                if !self.dropped_files.is_empty() {
+                    for file in &self.dropped_files {
+                        let mut file_path = if let Some(path) = &file.path {
+                            path.display().to_string()
+                        } else if !file.name.is_empty() {
+                            file.name.clone()
                         } else {
-                            self.write_file_result = "Hash saved to file!";
+                            "???".to_owned()
                         };
+                        if let Some(bytes) = &file.bytes {
+                            file_path += &format!(" ({} bytes)", bytes.len());
+                        }
+                        self.file_path = file_path;
                     }
-                    ui.label(format!("Output file path: {}", self.output_file_path));
-                    ui.label("NOTE: IF A FILE MATCHING THE OUTPUT FILE PATH ALREADY EXISTS, SAVING THE HASH WILL OVERWRITE IT");
-                    if !self.write_file_result.is_empty() {
-                        ui.label(self.write_file_result);
+                    self.dropped_files.clear();
+                    self.computed_hash = "".to_string();
+                }
+
+                // Display hash and info
+                ui.label("\n");
+
+                if !self.computed_hash.is_empty() {
+                    ui.group(|ui| {
+                        ui.label("Hash is");
+                        selectable_text(ui, self.computed_hash.as_str());
+
+                        if !self.entered_hash.is_empty() {
+                            ui.label(format!("Hashes match: {}", self.computed_hash == self.entered_hash));
+                        }
+                    });
+                    if !self.output_file_path.is_empty() {
+                        if ui.button("Save hash to file").clicked() {
+                            if let Err(e) = write_file(&self.computed_hash, &self.file_path) {
+                                let err_mess = "Unable to save hash to file!";
+                                println!("{}! Error: {}", err_mess, e);
+                                self.write_file_result = err_mess;
+                            } else {
+                                self.write_file_result = "Hash saved to file!";
+                            };
+                        }
+                        ui.label(format!("Output file path: {}", self.output_file_path));
+                        ui.label("NOTE: IF A FILE MATCHING THE OUTPUT FILE PATH ALREADY EXISTS, SAVING THE HASH WILL OVERWRITE IT");
+                        if !self.write_file_result.is_empty() {
+                            ui.label(self.write_file_result);
+                        }
                     }
                 }
-            }
+            });
         });
 
         preview_files_being_dropped(ctx);
@@ -182,7 +189,7 @@ fn selectable_text(ui: &mut egui::Ui, mut text: &str) {
 
 /// Preview hovering files
 fn preview_files_being_dropped(ctx: &egui::Context) {
-    use egui::*;
+    use crate::egui::*;
 
     if !ctx.input().raw.hovered_files.is_empty() {
         let mut text = "Dropping files:\n".to_owned();

@@ -11,8 +11,8 @@ use std::io::Write;
 pub fn run() {
     let options = eframe::NativeOptions {
         drag_and_drop_support: true,
-        max_window_size: Some([700.0, 520.0].into()),
-        min_window_size: Some([650.0, 500.0].into()),
+        max_window_size: Some([700.0, 470.0].into()),
+        min_window_size: Some([650.0, 450.0].into()),
         ..Default::default()
     };
     eframe::run_native(
@@ -164,9 +164,9 @@ impl eframe::App for Fash {
                             };
                         }
                         ui.label(format!("Output file path: {}", self.output_file_path));
-                        ui.label("NOTE: IF A FILE MATCHING THE OUTPUT FILE PATH ALREADY EXISTS, SAVING THE HASH WILL OVERWRITE IT");
+                        ui.colored_label(egui::Color32::DARK_RED, "NOTE: IF A FILE MATCHING THE OUTPUT FILE PATH ALREADY EXISTS, SAVING THE HASH WILL OVERWRITE IT");
                         if !self.write_file_result.is_empty() {
-                            ui.label(self.write_file_result);
+                            ui.strong(self.write_file_result);
                         }
                     }
                 }

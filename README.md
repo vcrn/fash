@@ -1,11 +1,11 @@
 # fash
 
-`fash` (file hasher) is a cross-platform GUI-app for computing hashes of files and comparing them to supplied hashes. `fash` can compute hashes using the algorithms SHA256, SHA1 and MD5.
+`fash` (file hasher) is a cross-platform GUI-app for computing hashes of files and comparing them to supplied hashes. `fash` can compute hashes using the algorithms SHA256, SHA1 and MD5, and save these to a file.
 
 <div align="center">
   <img src="assets/demo.gif" alt="Demo GIF of FeO running."/>
   <p>
-    <i>Demo GIF where file is dragged and dropped.</i>
+    <i>Demo GIF where a file is dragged and dropped, and functionality demonstrated.</i>
   </p>
 </div>
 

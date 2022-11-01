@@ -1,6 +1,6 @@
 [package]
 name = "fash"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Victor Nilsson <@vcrn>"]
 description = "cross-platform GUI-app for calculating hashes of files and comparing them to supplied hashes"
 keywords = ["hash", "gui", "cross-platform", "sha256"]

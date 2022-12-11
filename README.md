@@ -9,7 +9,7 @@
   </p>
 </div>
 
-Written in Rust, using the library <a href="https://github.com/emilk/egui">egui</a> for the GUI, and libraries from <a href="https://github.com/RustCrypto">RustCrypto</a> for computing hashes. Example code from `egui` is used to create file dialog.
+Written in Rust, using the libraries <a href="https://github.com/emilk/egui">egui</a> for the GUI, <a href="https://github.com/PolyMeilex/rfd">rfd</a> for dialog windows, and various libraries from <a href="https://github.com/RustCrypto">RustCrypto</a> for computing hashes.
 
 
 # Installation

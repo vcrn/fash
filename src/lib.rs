@@ -20,7 +20,7 @@ pub fn run() {
         options,
         Box::new(|cc| {
             cc.egui_ctx.set_visuals(egui::Visuals::dark());
-            Box::new(Fash::default())
+            Box::<Fash>::default()
         }),
     );
 }
@@ -55,7 +55,6 @@ struct Fash {
 impl eframe::App for Fash {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-
             ui.horizontal(|ui| {
                 ui.vertical(|ui| {
                     egui::global_dark_light_mode_buttons(ui);
@@ -78,15 +77,13 @@ impl eframe::App for Fash {
                         egui::TextEdit::multiline(&mut self.entered_hash)
                             .hint_text("Enter hash to compare file hash, to or leave blank"),
                     );
-                    if !self.entered_hash.is_empty() {
-                        if !self.keep_whitespace {
-                            self.entered_hash.retain(|c| !c.is_whitespace());
-                        }
+                    if !self.entered_hash.is_empty() && !self.keep_whitespace {
+                        self.entered_hash.retain(|c| !c.is_whitespace());
                     };
                 });
             });
 
-            ui.label("\n"); // To get some space 
+            ui.label("\n"); // To get some space
 
             ui.with_layout(egui::Layout::top_down(Align::Center), |ui| {
                 if !self.file_path.is_empty() {
@@ -104,8 +101,10 @@ impl eframe::App for Fash {
                             };
                             self.computed_hash = match hash_result {
                                 Ok(hash) => {
-                                    self.output_file_path =
-                                        generate_output_file_path(&self.file_path, &self.radio_hash);
+                                    self.output_file_path = generate_output_file_path(
+                                        &self.file_path,
+                                        &self.radio_hash,
+                                    );
                                     hash
                                 }
                                 _ => {
@@ -150,21 +149,24 @@ impl eframe::App for Fash {
                         selectable_text(ui, self.computed_hash.as_str());
 
                         if !self.entered_hash.is_empty() {
-                            ui.label(format!("Hashes match: {}", self.computed_hash == self.entered_hash));
+                            ui.label(format!(
+                                "Hashes match: {}",
+                                self.computed_hash == self.entered_hash
+                            ));
                         }
                     });
                     if !self.output_file_path.is_empty() {
                         if ui.button("Save hash to file").clicked() {
-                            if let Err(e) = write_file(&self.computed_hash, &self.file_path) {
+                            if let Err(e) = write_file(&self.computed_hash, &self.output_file_path)
+                            {
                                 let err_mess = "Unable to save hash to file!";
-                                println!("{}! Error: {}", err_mess, e);
+                                println!("{err_mess}! Error: {e}");
                                 self.write_file_result = err_mess;
                             } else {
                                 self.write_file_result = "Hash saved to file!";
                             };
                         }
                         ui.label(format!("Output file path: {}", self.output_file_path));
-                        ui.colored_label(egui::Color32::DARK_RED, "NOTE: IF A FILE MATCHING THE OUTPUT FILE PATH ALREADY EXISTS, SAVING THE HASH WILL OVERWRITE IT");
                         if !self.write_file_result.is_empty() {
                             ui.strong(self.write_file_result);
                         }
@@ -239,7 +241,16 @@ pub fn generate_output_file_path(input_file_path: &str, hash_algorithm: &RadioHa
 }
 
 /// Writes data to output_file_path
-fn write_file(data: &str, output_file_path: &str) -> Result<(), std::io::Error> {
+fn write_file(data: &str, output_file_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+    if std::path::Path::new(output_file_path).is_file() {
+        let msg = rfd::MessageDialog::new();
+        let msg = msg.set_title("Warning: File already exists!");
+        let msg = msg.set_description(&format!("Do you want to overwrite {output_file_path}?"));
+        let msg = msg.set_buttons(rfd::MessageButtons::OkCancel);
+        if !rfd::MessageDialog::show(msg) {
+            return Err("Writing permission denied".into());
+        }
+    }
     let mut f = std::fs::File::create(output_file_path)?;
     f.write_all(data.as_bytes())?;
 

@@ -8,6 +8,8 @@ use sha1::Sha1;
 use sha2::Sha256;
 use std::io::Write;
 
+use anyhow::{bail, Error};
+
 pub fn run() {
     let options = eframe::NativeOptions {
         drag_and_drop_support: true,
@@ -49,7 +51,7 @@ struct Fash {
     computed_hash: String,
     radio_hash: RadioHash,
     output_file_path: String,
-    write_file_result: &'static str,
+    write_file_result: String,
 }
 
 impl eframe::App for Fash {
@@ -92,7 +94,7 @@ impl eframe::App for Fash {
                         ui.label(&self.file_path);
 
                         if ui.button("Compute file hash").clicked() {
-                            self.write_file_result = ""; // Emptied to not display old Ok or error message for saving hash to file
+                            self.write_file_result = "".to_string(); // Emptied to not display old Ok or error message for saving hash to file
 
                             let hash_result = match self.radio_hash {
                                 RadioHash::Sha256 => compute_hash::<Sha256>(&self.file_path),
@@ -157,18 +159,17 @@ impl eframe::App for Fash {
                     });
                     if !self.output_file_path.is_empty() {
                         if ui.button("Save hash to file").clicked() {
-                            if let Err(e) = write_file(&self.computed_hash, &self.output_file_path)
+                            if let Err(err_msg) =
+                                write_file(&self.computed_hash, &self.output_file_path)
                             {
-                                let err_mess = "Unable to save hash to file!";
-                                println!("{err_mess}! Error: {e}");
-                                self.write_file_result = err_mess;
+                                self.write_file_result = format!("{err_msg}");
                             } else {
-                                self.write_file_result = "Hash saved to file!";
+                                self.write_file_result = "Hash saved to file!".to_string();
                             };
                         }
                         ui.label(format!("Output file path: {}", self.output_file_path));
                         if !self.write_file_result.is_empty() {
-                            ui.strong(self.write_file_result);
+                            ui.strong(&self.write_file_result);
                         }
                     }
                 }
@@ -241,14 +242,14 @@ pub fn generate_output_file_path(input_file_path: &str, hash_algorithm: &RadioHa
 }
 
 /// Writes data to output_file_path
-fn write_file(data: &str, output_file_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+fn write_file(data: &str, output_file_path: &str) -> Result<(), Error> {
     if std::path::Path::new(output_file_path).is_file() {
         let msg = rfd::MessageDialog::new();
         let msg = msg.set_title("Warning: File already exists!");
         let msg = msg.set_description(&format!("Do you want to overwrite {output_file_path}?"));
         let msg = msg.set_buttons(rfd::MessageButtons::OkCancel);
         if !rfd::MessageDialog::show(msg) {
-            return Err("Writing permission denied".into());
+            bail!("Writing permission denied");
         }
     }
     let mut f = std::fs::File::create(output_file_path)?;

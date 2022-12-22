@@ -21,8 +21,9 @@ jobs:
       run: cargo fmt --all --check
 
     - name: Run tests
-      run: 
+      run: |
         sudo apt-get install librust-atk-dev
+        sudo apt-get install librust-gdk-dev
         cargo test --verbose
       
     - name: Clippy

@@ -28,7 +28,7 @@ pub fn run() {
 }
 
 /// Used by radio buttons to select hashing algorithm
-#[derive(PartialEq)]
+#[derive(PartialEq, Eq)]
 pub enum RadioHash {
     Sha256,
     Sha1,

@@ -20,6 +20,9 @@ jobs:
     - name: Check cargo fmt
       run: cargo fmt --all --check
 
+    - name: Install dependecy atk-sys for gtk
+      run: apt-get install librust-atk-dev
+
     - name: Build
       run: cargo build --verbose
 
@@ -28,3 +31,6 @@ jobs:
       
     - name: Clippy
       run: cargo clippy -- -D warnings
+        
+    - name: Audit
+      run: cargo audit

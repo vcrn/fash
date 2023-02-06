@@ -22,8 +22,9 @@ jobs:
 
     - name: Run tests
       run: |
-        sudo apt-get install librust-atk-dev
-        sudo apt-get install librust-gdk-dev
+        sudo apt update
+        sudo apt install librust-atk-dev
+        sudo apt install librust-gdk-dev
         cargo test --verbose
       
     - name: Clippy

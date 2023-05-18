@@ -41,7 +41,6 @@ struct Fash {
     dropped_files: Vec<egui::DroppedFile>,
     picked_path: Option<String>,
     entered_hash: String,
-    keep_whitespace: bool,
     file_path: String,
     computed_hash: String,
     radio_hash: RadioHash,
@@ -69,12 +68,11 @@ impl eframe::App for Fash {
                 });
 
                 ui.with_layout(egui::Layout::top_down(Align::RIGHT), |ui| {
-                    ui.checkbox(&mut self.keep_whitespace, "Keep whitespace");
                     ui.add(
                         egui::TextEdit::multiline(&mut self.entered_hash)
                             .hint_text("Enter hash to compare file hash, to or leave blank"),
                     );
-                    if !self.entered_hash.is_empty() && !self.keep_whitespace {
+                    if !self.entered_hash.is_empty() {
                         self.entered_hash.retain(|c| !c.is_whitespace());
                     };
                 });
@@ -146,9 +144,9 @@ impl eframe::App for Fash {
                         selectable_text(ui, self.computed_hash.as_str());
 
                         if !self.entered_hash.is_empty() {
-                            ui.label(format!(
+                            ui.strong(format!(
                                 "Hashes match: {}",
-                                self.computed_hash == self.entered_hash
+                                self.computed_hash == self.entered_hash.to_uppercase()
                             ));
                         }
                     });

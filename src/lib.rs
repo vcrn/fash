@@ -240,7 +240,7 @@ fn write_file(data: &str, output_file_path: &str) -> Result<(), Error> {
     if std::path::Path::new(output_file_path).is_file() {
         let msg = rfd::MessageDialog::new();
         let msg = msg.set_title("Warning: File already exists!");
-        let msg = msg.set_description(&format!("Do you want to overwrite {output_file_path}?"));
+        let msg = msg.set_description(format!("Do you want to overwrite {output_file_path}?"));
         let msg = msg.set_buttons(rfd::MessageButtons::OkCancel);
         if rfd::MessageDialog::show(msg) != rfd::MessageDialogResult::Ok {
             bail!("Writing permission denied");

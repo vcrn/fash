@@ -12,12 +12,13 @@ use anyhow::{bail, Error};
 
 pub fn run() {
     let options = eframe::NativeOptions {
-        drag_and_drop_support: true,
-        max_window_size: Some([700.0, 470.0].into()),
-        min_window_size: Some([650.0, 450.0].into()),
+        viewport: egui::ViewportBuilder::default()
+            .with_drag_and_drop(true)
+            .with_max_inner_size([700.0, 470.0])
+            .with_min_inner_size([650.0, 450.0]),
         ..Default::default()
     };
-    eframe::run_native(
+    let _ = eframe::run_native(
         "fash",
         options,
         Box::new(|cc| {
@@ -172,8 +173,8 @@ impl eframe::App for Fash {
         preview_files_being_dropped(ctx);
 
         // Collect dropped files:
-        if !ctx.input().raw.dropped_files.is_empty() {
-            self.dropped_files = ctx.input().raw.dropped_files.clone();
+        if !ctx.input(|i| i.raw.dropped_files.is_empty()) {
+            self.dropped_files = ctx.input(|i| i.raw.dropped_files.clone());
         }
     }
 }
@@ -187,9 +188,9 @@ fn selectable_text(ui: &mut egui::Ui, mut text: &str) {
 fn preview_files_being_dropped(ctx: &egui::Context) {
     use crate::egui::*;
 
-    if !ctx.input().raw.hovered_files.is_empty() {
+    if !ctx.input(|i| i.raw.hovered_files.is_empty()) {
         let mut text = "Dropping files:\n".to_owned();
-        for file in &ctx.input().raw.hovered_files {
+        for file in &ctx.input(|i| i.raw.hovered_files.clone()) {
             if let Some(path) = &file.path {
                 text += &format!("\n{}", path.display());
             } else if !file.mime.is_empty() {
@@ -202,7 +203,7 @@ fn preview_files_being_dropped(ctx: &egui::Context) {
         let painter =
             ctx.layer_painter(LayerId::new(Order::Foreground, Id::new("file_drop_target")));
 
-        let screen_rect = ctx.input().screen_rect();
+        let screen_rect = ctx.input(|i| i.screen_rect());
         painter.rect_filled(screen_rect, 0.0, Color32::from_black_alpha(192));
         painter.text(
             screen_rect.center(),
@@ -241,7 +242,7 @@ fn write_file(data: &str, output_file_path: &str) -> Result<(), Error> {
         let msg = msg.set_title("Warning: File already exists!");
         let msg = msg.set_description(&format!("Do you want to overwrite {output_file_path}?"));
         let msg = msg.set_buttons(rfd::MessageButtons::OkCancel);
-        if !rfd::MessageDialog::show(msg) {
+        if rfd::MessageDialog::show(msg) != rfd::MessageDialogResult::Ok {
             bail!("Writing permission denied");
         }
     }
